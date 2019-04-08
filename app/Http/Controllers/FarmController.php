@@ -43,6 +43,20 @@ class FarmController extends Controller
 		 * @return \Illuminate\Http\Response
 		 */
 
+		public function testDbConnection(){
+			echo "Hello Urduja!";
+			try {
+			    DB::connection()->getPdo();
+			    echo "Connected to db: "
+			} catch (\Exception $e) {
+			    die("Could not connect to the database.  Please check your configuration. error:" . $e );
+			}
+		}
+
+		public function getAllPigs(){
+			return Farm::get();  
+		}
+
 		public function index()
 		{
 			$user = $this->user;
