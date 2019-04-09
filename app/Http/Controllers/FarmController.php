@@ -58,7 +58,7 @@ class FarmController extends Controller
 		}
 
 		public function index()
-		{
+		{ 
 			$user = $this->user;
 			$farm = Farm::find($user->farmable_id);
 			$breed = Breed::find($farm->breedable_id);

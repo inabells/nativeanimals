@@ -25,3 +25,8 @@ Route::get('getAllSows', "ApiController@getAllSows");
 Route::get('getAllBoars', "ApiController@getAllBoars");
 Route::get('getAllFemaleGrowers', "ApiController@getAllFemaleGrowers");
 Route::get('getAllMaleGrowers', "ApiController@getAllMaleGrowers");
+Route::get('getAnimalProperties', "ApiController@getAnimalProperties");
+Route::post('fetchGrossMorphology',"ApiController@fetchGrossMorphology");
+Route::post('fetchMorphometricCharacteristics',"ApiController@fetchMorphometricCharacteristics");
+Route::get('getAllCount', "ApiController@getAllCount");
+Route::post('fetchWeightRecords',"ApiController@fetchWeightRecords");

@@ -437,10 +437,16 @@ class ApiController extends Controller
         // }
         return json_encode($boars);
     }
-    
+
+    public function getAnimalProperties(Request $request){ // function to display Add Gross Morphology page
+        $animal = Animal::where("registryid", $request->registry_id)->first();
+        $properties = $animal->getAnimalProperties();
+
+        return json_encode(compact('animal', 'properties'));
+    }
+
     public function getViewSowPage(Request $request){ // function to display View Sow page
-        // $sow = Animal::find($request->id);
-        $sow = Animal::where("registryid", $request->registry_id);
+        $sow = Animal::where("registryid", $request->registry_id)->first();
         $properties = $sow->getAnimalProperties();
         // $properties = AnimalProperty::where('animal_id', $sow->id)->get();
 
@@ -573,8 +579,593 @@ class ApiController extends Controller
             $age_morphochars = "";
         }
 
-        return json_encode(compact('boar', 'properties', 'age', 'ageAtWeaning', 'ageAtFirstMating', 'males', 'females', 'parity_born', 'age_grossmorpho', 'age_morphochars', 'photo'));
+        return json_encode(compact('boar', 'properties', 'age', 'ageAtWeaning', 'ageAtFirstMating', 'males', 'females', 'parity_born', 'age_grossmorpho', 'age_morphochars', 'photo'));   
+    }
+
+    public function fetchGrossMorphology(Request $request){ // function to add gross morphology data
+        $animal = Animal::where("registryid", $request->registry_id)->first();
+        $animalid = $animal->id;
+
+        // $animal = Animal::where("registryid", $request->registry_id)->first();
+        // $properties = $animal->getAnimalProperties();
+
+        // creates new properties
+        $dcgross = $animal->getAnimalProperties()->where("property_id", 10)->first();
+        $hairtype = $animal->getAnimalProperties()->where("property_id", 11)->first();
+        $hairlength = $animal->getAnimalProperties()->where("property_id", 12)->first();
+        $coatcolor = $animal->getAnimalProperties()->where("property_id", 13)->first();
+        $colorpattern = $animal->getAnimalProperties()->where("property_id", 14)->first();
+        $headshape = $animal->getAnimalProperties()->where("property_id", 15)->first();
+        $skintype = $animal->getAnimalProperties()->where("property_id", 16)->first();
+        $eartype = $animal->getAnimalProperties()->where("property_id", 17)->first();
+        $backline = $animal->getAnimalProperties()->where("property_id", 18)->first();
+        $tailtype = $animal->getAnimalProperties()->where("property_id", 19)->first();
+        $othermarks = $animal->getAnimalProperties()->where("property_id", 20)->first();
+
+        if($dcgross==null) $dcgross = new AnimalProperty;
+        if($hairtype==null) $hairtype = new AnimalProperty;
+        if($hairlength==null) $hairlength = new AnimalProperty;
+        if($coatcolor==null) $coatcolor = new AnimalProperty;
+        if($colorpattern==null) $colorpattern = new AnimalProperty;
+        if($headshape==null) $headshape = new AnimalProperty;
+        if($skintype==null) $skintype = new AnimalProperty;
+        if($eartype==null) $eartype = new AnimalProperty;
+        if($backline==null) $backline = new AnimalProperty;
+        if($tailtype==null) $tailtype = new AnimalProperty;
+        if($othermarks==null) $othermarks = new AnimalProperty;
+
+        if(is_null($request->date_collected_gross)){
+            $dateCollectedGrossValue = new Carbon();
+            $dateCollectedGrossValue = $dateCollectedGrossValue->format('Y-m-d');
+        }
+        else{
+            $dateCollectedGrossValue = $request->date_collected_gross;
+        }
+
+        $dcgross->animal_id = $animalid;
+        $dcgross->property_id = 10;
+        $dcgross->value = $dateCollectedGrossValue;
+
+        if(is_null($request->hair_type)){
+            $hairTypeValue = "Not specified";
+        }
+        else{
+            $hairTypeValue = $request->hair_type;
+        }
+
+        $hairtype->animal_id = $animalid;
+        $hairtype->property_id = 11;
+        $hairtype->value = $hairTypeValue;
+
+        if(is_null($request->hair_length)){
+            $hairLengthValue = "Not specified";
+        }
+        else{
+            $hairLengthValue = $request->hair_length;
+        }
+
+        $hairlength->animal_id = $animalid;
+        $hairlength->property_id = 12;
+        $hairlength->value = $hairLengthValue;
+
+        if(is_null($request->coat_color)){
+            $coatColorValue = "Not specified";
+        }
+        else{
+            $coatColorValue = $request->coat_color;
+        }
+
+        $coatcolor->animal_id = $animalid;
+        $coatcolor->property_id = 13;
+        $coatcolor->value = $coatColorValue;
+
+        if(is_null($request->color_pattern)){
+            $colorPatternValue = "Not specified";
+        }
+        else{
+            $colorPatternValue = $request->color_pattern;
+        }
+
+        $colorpattern->animal_id = $animalid;
+        $colorpattern->property_id = 14;
+        $colorpattern->value = $colorPatternValue;
+
+        if(is_null($request->head_shape)){
+            $headShapeValue = "Not specified";
+        }
+        else{
+            $headShapeValue = $request->head_shape;
+        }
+
+        $headshape->animal_id = $animalid;
+        $headshape->property_id = 15;
+        $headshape->value = $headShapeValue;
+
+        if(is_null($request->skin_type)){
+            $skinTypeValue = "Not specified";
+        }
+        else{
+            $skinTypeValue = $request->skin_type;
+        }
+
+        $skintype->animal_id = $animalid;
+        $skintype->property_id = 16;
+        $skintype->value = $skinTypeValue;
+
+        if(is_null($request->ear_type)){
+            $earTypeValue = "Not specified";
+        }
+        else{
+            $earTypeValue = $request->ear_type;
+        }
+
+        $eartype->animal_id = $animalid;
+        $eartype->property_id = 17;
+        $eartype->value = $earTypeValue;
+
+        if(is_null($request->tail_type)){
+            $tailTypeValue = "Not specified";
+        }
+        else{
+            $tailTypeValue = $request->tail_type;
+        }
+
+        $tailtype->animal_id = $animalid;
+        $tailtype->property_id = 18;
+        $tailtype->value = $tailTypeValue;
+
+        if(is_null($request->backline)){
+            $backlineValue = "Not specified";
+        }
+        else{
+            $backlineValue = $request->backline;
+        }
+
+        $backline->animal_id = $animalid;
+        $backline->property_id = 19;
+        $backline->value = $backlineValue;
+
+        if(is_null($request->other_marks)){
+            $otherMarksValue = "None";
+        }
+        else{
+            $otherMarksValue = $request->other_marks;
+        }
+
+        $othermarks->animal_id = $animalid;
+        $othermarks->property_id = 20;
+        $othermarks->value = $otherMarksValue;
+
+        $dcgross->save();
+        $hairtype->save();
+        $hairlength->save();
+        $coatcolor->save();
+        $colorpattern->save();
+        $headshape->save();
+        $skintype->save();
+        $eartype->save();
+        $tailtype->save();
+        $backline->save();
+        $othermarks->save();
+
+        $animal = Animal::find($animalid);
+        $animal->grossmorpho = 1;
+        $animal->save();
+
+        // if(!is_null($request->display_photo)){
+        //     $image = $request->file('display_photo');
+        //     $input['image_name'] = $animal->id.'-'.$animal->registryid.'-display-photo'.'.'.$image->getClientOriginalExtension();
+        //     $destination = public_path('/images');
+        //     $image->move($destination, $input['image_name']);
+
+        //     DB::table('uploads')->insert(['animal_id' => $animal->id, 'animaltype_id' => 3, 'breed_id' => $animal->breed_id, 'filename' => $input['image_name']]);
+        // }
+
+        //return Redirect::back()->with('message','Animal record successfully saved');
+    }
+
+    public function fetchMorphometricCharacteristics(Request $request){ // function to add morphometric characteristics
+        $animal = Animal::where("registryid", $request->registry_id)->first();
+        $animalid = $animal->id;
+
+        // creates new properties
+        $dcmorpho = $animal->getAnimalProperties()->where("property_id", 21)->first();
+        $earlength = $animal->getAnimalProperties()->where("property_id", 22)->first();
+        $headlength = $animal->getAnimalProperties()->where("property_id", 23)->first();
+        $snoutlength = $animal->getAnimalProperties()->where("property_id", 24)->first();
+        $bodylength = $animal->getAnimalProperties()->where("property_id", 25)->first();
+        $heartgirth = $animal->getAnimalProperties()->where("property_id", 26)->first();
+        $pelvicwidth = $animal->getAnimalProperties()->where("property_id", 27)->first();
+        $taillength = $animal->getAnimalProperties()->where("property_id", 28)->first();
+        $heightatwithers = $animal->getAnimalProperties()->where("property_id", 29)->first();
+        $normalteats = $animal->getAnimalProperties()->where("property_id", 30)->first();
+        //$othermarks = $animal->getAnimalProperties()->where("property_id", 20)->first();
+
+        if($dcmorpho==null) $dcmorpho = new AnimalProperty;
+        if($earlength==null) $earlength = new AnimalProperty;
+        if($headlength==null) $headlength = new AnimalProperty;
+        if($bodylength==null) $bodylength = new AnimalProperty;
+        if($snoutlength==null) $snoutlength = new AnimalProperty;
+        if($heartgirth==null) $heartgirth = new AnimalProperty;
+        if($pelvicwidth==null) $pelvicwidth = new AnimalProperty;
+        if($taillength==null) $taillength = new AnimalProperty;
+        if($heightatwithers==null) $heightatwithers = new AnimalProperty;
+        if($normalteats==null) $normalteats = new AnimalProperty;
+        //if($othermarks==null) $othermarks = new AnimalProperty;
+
+        if(is_null($request->date_collected_morpho)){
+            $dateCollectedMorphoValue = "";
+        }
+        else{
+            $dateCollectedMorphoValue = $request->date_collected_morpho;
+        }
+
+        $dcmorpho->animal_id = $animalid;
+        $dcmorpho->property_id = 21;
+        $dcmorpho->value = $dateCollectedMorphoValue;
+
+        if(is_null($request->ear_length)){
+            $earLengthValue = "";
+        }
+        else{
+            $earLengthValue = $request->ear_length;
+        }
+
+        $earlength->animal_id = $animalid;
+        $earlength->property_id = 22;
+        $earlength->value = $earLengthValue;
+
+        if(is_null($request->head_length)){
+            $headLengthValue = "";
+        }
+        else{
+            $headLengthValue = $request->head_length;
+        }
+
+        $headlength->animal_id = $animalid;
+        $headlength->property_id = 23;
+        $headlength->value = $headLengthValue;
+
+        if(is_null($request->snout_length)){
+            $snoutLengthValue = "";
+        }
+        else{
+            $snoutLengthValue = $request->snout_length;
+        }
+
+        $snoutlength->animal_id = $animalid;
+        $snoutlength->property_id = 24;
+        $snoutlength->value = $snoutLengthValue;
+
+        if(is_null($request->body_length)){
+            $bodyLengthValue = "";
+        }
+        else{
+            $bodyLengthValue = $request->body_length;
+        }
+
+        $bodylength->animal_id = $animalid;
+        $bodylength->property_id = 25;
+        $bodylength->value = $bodyLengthValue;
+
+        if(is_null($request->heart_girth)){
+            $heartGirthValue = "";
+        }
+        else{
+            $heartGirthValue = $request->heart_girth;
+        }
+
+        $heartgirth->animal_id = $animalid;
+        $heartgirth->property_id = 26;
+        $heartgirth->value = $heartGirthValue;
+
+        if(is_null($request->pelvic_width)){
+            $pelvicWidthValue = "";
+        }
+        else{
+            $pelvicWidthValue = $request->pelvic_width;
+        }
+
+        $pelvicwidth->animal_id = $animalid;
+        $pelvicwidth->property_id = 27;
+        $pelvicwidth->value = $pelvicWidthValue;
+
+        if(is_null($request->tail_length)){
+            $tailLengthValue = "";
+        }
+        else{
+            $tailLengthValue = $request->tail_length;
+        }
+
+        $taillength->animal_id = $animalid;
+        $taillength->property_id = 28;
+        $taillength->value = $tailLengthValue;
+
+        if(is_null($request->height_at_withers)){
+            $heightAtWithersValue = "";
+        }
+        else{
+            $heightAtWithersValue = $request->height_at_withers;
+        }
+
+        $heightatwithers->animal_id = $animalid;
+        $heightatwithers->property_id = 29;
+        $heightatwithers->value = $heightAtWithersValue;
+
+
+        $animal = Animal::find($animalid);
+
+        if(is_null($request->number_normal_teats)){
+            $normalTeatsValue = "";
+        }
+        else{
+            $normalTeatsValue = $request->number_normal_teats;
+        }
+
+        $normalteats->animal_id = $animalid;
+        $normalteats->property_id = 30;
+        $normalteats->value = $normalTeatsValue;
+        $normalteats->save();
+     
+        $dcmorpho->save();
+        $earlength->save();
+        $headlength->save();
+        $snoutlength->save();
+        $bodylength->save();
+        $pelvicwidth->save();
+        $heartgirth->save();
+        $taillength->save();
+        $heightatwithers->save();
         
+        $animal->morphochars = 1;
+        $animal->save();
+
+        //return Redirect::back()->with('message','Animal record successfully saved');
+    }
+
+    public function fetchWeightRecords(Request $request){ // function to add weight records
+            $animal = Animal::where("registryid", $request->registry_id)->first();
+            $animalid = $animal->id;
+            $animal = Animal::find($animalid);
+            $properties = $animal->getAnimalProperties();
+
+            // used when date collected was not provided
+            $bday = $properties->where("property_id", 3)->first();
+
+            $bw45d = $animal->getAnimalProperties()->where("property_id", 32)->first();
+            $dc45d = $animal->getAnimalProperties()->where("property_id", 37)->first();
+            $bw60d = $animal->getAnimalProperties()->where("property_id", 33)->first();
+            $dc60d = $animal->getAnimalProperties()->where("property_id", 38)->first();
+            $bw90d = $animal->getAnimalProperties()->where("property_id", 34)->first();
+            $dc90d = $animal->getAnimalProperties()->where("property_id", 39)->first();
+            $bw150d = $animal->getAnimalProperties()->where("property_id", 35)->first();
+            $dc150d = $animal->getAnimalProperties()->where("property_id", 40)->first();
+            $bw180d = $animal->getAnimalProperties()->where("property_id", 36)->first();
+            $dc180d = $animal->getAnimalProperties()->where("property_id", 41)->first();
+            //$othermarks = $animal->getAnimalProperties()->where("property_id", 20)->first();
+
+            if($bw45d==null) $bw45d = new AnimalProperty;
+            if($dc45d==null) $dc45d = new AnimalProperty;
+            if($bw60d==null) $bw60d = new AnimalProperty;
+            if($dc60d==null) $dc60d = new AnimalProperty;
+            if($bw90d==null) $bw90d = new AnimalProperty;
+            if($dc90d==null) $dc90d = new AnimalProperty;
+            if($bw150d==null) $bw150d = new AnimalProperty;
+            if($dc150d==null) $dc150d = new AnimalProperty;
+            if($bw180d==null) $bw180d = new AnimalProperty;
+            if($dc180d==null) $dc180d = new AnimalProperty;
+
+            $datefarrowedprop = $properties->where("property_id", 3)->first();
+            $dateweanedprop = $properties->where("property_id", 6)->first();
+
+            if(!is_null($datefarrowedprop) && !is_null($dateweanedprop)){
+                if($datefarrowedprop->value != "Not specified" && $dateweanedprop->value != "Not specified"){
+                    $datefarrowed = Carbon::parse($datefarrowedprop->value);
+                    $dateweaned = Carbon::parse($dateweanedprop->value);
+                    $age_weaned = $dateweaned->diffInDays($datefarrowed);
+                }
+                else{
+                    $age_weaned = "";
+                }
+            }
+            else{
+                $age_weaned = "";
+            }
+
+            if(is_null($request->body_weight_at_45_days)){
+                if($age_weaned == 45){
+                    $bw45dValue = $request->body_weight_at_45_days;
+                }
+                else{
+                    $bw45dValue = "";
+                }
+            }
+            else{
+                $bw45dValue = $request->body_weight_at_45_days;
+            }
+
+            $bw45d->animal_id = $animalid;
+            $bw45d->property_id = 32;
+            $bw45d->value = $bw45dValue;
+
+            if(is_null($request->date_collected_45_days)){
+                if(!is_null($bday) && $bday->value != "Not specified"){
+                    $dc45dValue = Carbon::parse($bday->value)->addDays(45)->toDateString();
+                }
+                else{
+                    $dc45dValue = "";
+                }
+            }
+            else{
+                $dc45dValue = $request->date_collected_45_days;
+            }
+
+            $dc45d->animal_id = $animalid;
+            $dc45d->property_id = 37;
+            $dc45d->value = $dc45dValue;
+
+            if(is_null($request->body_weight_at_60_days)){
+                if($age_weaned == 60){
+                    $bw60dValue = $request->body_weight_at_60_days;
+                }
+                else{
+                    $bw60dValue = "";
+                }
+            }
+            else{
+                $bw60dValue = $request->body_weight_at_60_days;
+            }
+
+            $bw60d->animal_id = $animalid;
+            $bw60d->property_id = 33;
+            $bw60d->value = $bw60dValue;
+
+            if(is_null($request->date_collected_60_days)){
+                if(!is_null($bday) && $bday->value != "Not specified"){
+                    $dc60dValue = Carbon::parse($bday->value)->addDays(60)->toDateString();
+                }
+                else{
+                    $dc60dValue = "";
+                }
+            }
+            else{
+                $dc60dValue = $request->date_collected_60_days;
+            }
+
+            $dc60d->animal_id = $animalid;
+            $dc60d->property_id = 38;
+            $dc60d->value = $dc60dValue;
+
+            if(is_null($request->body_weight_at_90_days)){
+                $bw90dValue = "";
+            }
+            else{
+                $bw90dValue = $request->body_weight_at_90_days;
+            }
+
+            $bw90d->animal_id = $animalid;
+            $bw90d->property_id = 34;
+            $bw90d->value = $bw90dValue;
+
+            if(is_null($request->date_collected_90_days)){
+                if(!is_null($bday) && $bday->value != "Not specified"){
+                    $dc90dValue = Carbon::parse($bday->value)->addDays(90)->toDateString();
+                }
+                else{
+                    $dc90dValue = "";
+                }
+            }
+            else{
+                $dc90dValue = $request->date_collected_90_days;
+            }
+
+            $dc90d->animal_id = $animalid;
+            $dc90d->property_id = 39;
+            $dc90d->value = $dc90dValue;
+
+            if(is_null($request->body_weight_at_150_days)){
+                $bw150dValue = "";
+            }
+            else{
+                $bw150dValue = $request->body_weight_at_150_days;
+            }
+
+            $bw150d->animal_id = $animalid;
+            $bw150d->property_id = 35;
+            $bw150d->value = $bw150dValue;
+
+            if(is_null($request->date_collected_150_days)){
+                if(!is_null($bday) && $bday->value != "Not specified"){
+                    $dc150dValue = Carbon::parse($bday->value)->addDays(150)->toDateString();
+                }
+                else{
+                    $dc150dValue = "";
+                }
+            }
+            else{
+                $dc150dValue = $request->date_collected_150_days;
+            }
+
+            $dc150d->animal_id = $animalid;
+            $dc150d->property_id = 40;
+            $dc150d->value = $dc150dValue;
+
+            if(is_null($request->body_weight_at_180_days)){
+                $bw180dValue = "";
+            }
+            else{
+                $bw180dValue = $request->body_weight_at_180_days;
+            }
+
+            $bw180d->animal_id = $animalid;
+            $bw180d->property_id = 36;
+            $bw180d->value = $bw180dValue;
+
+            if(is_null($request->date_collected_180_days)){
+                if(!is_null($bday) && $bday->value != "Not specified"){
+                    $dc180dValue = Carbon::parse($bday->value)->addDays(180)->toDateString();
+                }
+                else{
+                    $dc180dValue = "";
+                }
+            }
+            else{
+                $dc180dValue = $request->date_collected_180_days;
+            }
+
+            $dc180d->animal_id = $animalid;
+            $dc180d->property_id = 41;
+            $dc180d->value = $dc180dValue;
+
+            $bw45d->save();
+            $dc45d->save();
+            $bw60d->save();
+            $dc60d->save();
+            $bw90d->save();
+            $dc90d->save();
+            $bw150d->save();
+            $dc150d->save();
+            $bw180d->save();
+            $dc180d->save();
+
+            $animal = Animal::find($animalid);
+            $animal->weightrecord = 1;
+            $animal->save();
+        }
+
+    public function getAllCount()
+    {
+        $sow = 0;
+        $boar = 0;
+        $maleGrower = 0;
+        $femaleGrower = 0;
+
+        $breeders = Animal::where('status', "breeder")->get();
+        $growers = Animal::where('status', "active")->get();
+
+        foreach ($breeders as $breeder) {
+            if(substr($breeder->registryid, -7, 1) == 'F'){
+               $sow++; 
+            }else{
+                $boar++;
+            }
+        }
+
+        foreach ($growers as $grower) {
+            if(substr($grower->registryid, -7, 1) == 'F'){
+               $femaleGrower++; 
+            }else{
+                $maleGrower++;
+            }
+        }
+
+        $countArray = array('sowCount' => $sow,
+                    'boarCount' => $boar,
+                    'femaleGrowerCount' => $femaleGrower,
+                    'maleGrowerCount' => $maleGrower
+        );
+
+        return json_encode($countArray);    
     }
 
     /**
