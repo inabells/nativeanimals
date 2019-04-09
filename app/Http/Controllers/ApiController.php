@@ -1168,6 +1168,288 @@ class ApiController extends Controller
         return json_encode($countArray);    
     }
 
+    public function addAsBreeder(Request $request)
+    {
+        $searchPig = Animal::where('registryid', $request->registryid)->first();
+        $pig = Animal::find($searchPig->id);
+        $pig->status = 'breeder';
+        $pig->save();
+    }
+
+    public function getMortalityPage(Request $request){ // function to display Mortality and Sales page
+        $farm = Farm::find($request->farmable_id);
+        $breed = Breed::find($request->breedable_id);
+        $deadpigs = Mortality::where("animaltype_id", 3)->where("breed_id", $breed->id)->get();
+        $growers = Animal::where("animaltype_id", 3)->where("breed_id", $breed->id)->where("status", "active")->get();
+        $breeders = Animal::where("animaltype_id", 3)->where("breed_id", $breed->id)->where("status", "breeder")->get();
+
+        // TO FOLLOW: this will be used for filtering results
+        $now = Carbon::now();
+        $current_year = $now->year;
+        $range = range($current_year-10, $current_year+10);
+        $years = array_combine($range, $range);
+
+        $returnArray = [];
+        foreach ($deadpigs as $deadpig) {
+            $registry_id = Animal::where("id", $deadpig->animal_id)->first()->registryid;
+            $array = array('registry_id' => $registry_id,
+                    'datedied' => $deadpig->datedied, 
+                    'cause' => $deadpig->cause,
+                    'age' => $deadpig->age);
+            array_push($returnArray, $array);
+        }
+
+        return json_encode($returnArray); 
+    }
+
+    public function getSalesPage(Request $request){ // function to display Mortality and Sales page
+        $farm = Farm::find($request->farmable_id);
+        $breed = Breed::find($request->breedable_id);
+        $soldpigs = Sale::where("animaltype_id", 3)->where("breed_id", $breed->id)->get();
+        $growers = Animal::where("animaltype_id", 3)->where("breed_id", $breed->id)->where("status", "active")->get();
+        $breeders = Animal::where("animaltype_id", 3)->where("breed_id", $breed->id)->where("status", "breeder")->get();
+
+        // TO FOLLOW: this will be used for filtering results
+        $now = Carbon::now();
+        $current_year = $now->year;
+        $range = range($current_year-10, $current_year+10);
+        $years = array_combine($range, $range);
+
+        $returnArray = [];
+        foreach ($soldpigs as $soldpig) {
+            $registry_id = Animal::where("id", $soldpig->animal_id)->first()->registryid;
+            $array = array('registry_id' => $registry_id,
+                    'datesold' => $soldpig->datesold, 
+                    'weight' => $soldpig->weight,
+                    'price' => $soldpig->price,
+                    'age' => $soldpig->age);
+            array_push($returnArray, $array);
+        }
+
+        return json_encode($returnArray); 
+    }
+
+    public function getOthersPage(Request $request){ // function to display Mortality and Sales page
+        $farm = Farm::find($request->farmable_id);
+        $breed = Breed::find($request->breedable_id);
+        $removedpigs = RemovedAnimal::where("animaltype_id", 3)->where("breed_id", $breed->id)->get();
+        $growers = Animal::where("animaltype_id", 3)->where("breed_id", $breed->id)->where("status", "active")->get();
+        $breeders = Animal::where("animaltype_id", 3)->where("breed_id", $breed->id)->where("status", "breeder")->get();
+
+        // TO FOLLOW: this will be used for filtering results
+        $now = Carbon::now();
+        $current_year = $now->year;
+        $range = range($current_year-10, $current_year+10);
+        $years = array_combine($range, $range);
+
+        $returnArray = [];
+        foreach ($removedpigs as $removedpig) {
+            $registry_id = Animal::where("id", $removedpig->animal_id)->first()->registryid;
+            $array = array('registry_id' => $registry_id,
+                    'dateremoved' => $removedpig->dateremoved, 
+                    'reason' => $removedpig->reason,
+                    'age' => $removedpig->age);
+            array_push($returnArray, $array);
+        }
+
+        return json_encode($returnArray); 
+    }
+
+    public function addMortalityRecord(Request $request){ // function to add mortality record
+            $farm = Farm::find($request->farmable_id);
+            $breed = Breed::find($request->breedable_id);
+            $dead = Animal::where("registryid", $request->registry_id)->first();
+
+            $mortality = new Mortality();
+
+            // pig which died was a grower
+            if($dead->status == "active"){
+                $dead->status = "dead grower";
+                $dead->save();
+            }
+            // pig which died was a breeder
+            elseif($dead->status == "breeder"){
+                $dead->status = "dead breeder";
+                $dead->save();
+            }
+
+            if(is_null($request->date_died)){
+                $dateDiedValue = new Carbon();
+            }
+            else{
+                $dateDiedValue = $request->date_died;
+            }
+
+            if(is_null($request->cause_death)){
+                $causeDeathValue = "Not specified";
+            }
+            else{
+                $causeDeathValue = $request->cause_death;
+            }
+
+            $bday = $dead->getAnimalProperties()->where("property_id", 3)->first();
+            if(!is_null($bday)){
+                if($bday->value != "Not specified"){
+                    $age = Carbon::parse($dateDiedValue)->diffInDays(Carbon::parse($bday->value));
+                }
+                else{
+                    $age = "Age unavailable";
+                }
+            }
+            else{
+                $age = "Age unavailable";
+            }
+            // DB::table('mortalities')->insert(['animal_id' => $dead->id, 'animaltype_id' => 3, 'breed_id' => $breed->id, 'datedied' => $dateDiedValue, 'cause' => $causeDeathValue, 'age' => $age]);
+            $mortality->animal_id = $dead->id;
+            $mortality->animaltype_id = 3;
+            $mortality->breed_id = $breed->id;
+            $mortality->datedied = $dateDiedValue;
+            $mortality->cause = $causeDeathValue;
+            $mortality->age = $age;
+            $mortality->save();
+
+
+           // return Redirect::back()->with('message', 'Operation Successful!');
+        }
+
+    public function addSalesRecord(Request $request){ // function to add sales record
+            $farm = Farm::find($request->farmable_id);
+            $breed = Breed::find($request->breedable_id);
+            $sold = Animal::where("registryid", $request->registry_id)->first();
+
+            $sale = new Sale();
+
+            // pig sold was a grower
+            if($sold->status == "active"){
+                $sold->status = "sold grower";
+                $sold->save();
+            }
+            // pig sold was a breeder
+            elseif($sold->status == "breeder"){
+                $sold->status = "sold breeder";
+                $sold->save();
+            }
+                
+            if(is_null($request->date_sold)){
+                $dateSoldValue = new Carbon();
+            }
+            else{
+                $dateSoldValue = $request->date_sold;
+            }
+
+            if(is_null($request->weight_sold)){
+                $weightSoldValue = "Weight unavailable";
+            }
+            else{
+                $weightSoldValue = $request->weight_sold;
+            }
+
+            if(is_null($request->price)){
+                $priceValue = "Not specified";
+            }
+            else{
+                $priceValue = $request->price;
+            }
+
+            $bday = $sold->getAnimalProperties()->where("property_id", 3)->first();
+            if(!is_null($bday)){
+                if($bday->value != "Not specified"){
+                    $age = Carbon::parse($dateSoldValue)->diffInDays(Carbon::parse($bday->value));
+                }
+                else{
+                    $age = "Age unavailable";
+                }
+            }
+            else{
+                $age = "Age unavailable";
+            }
+
+            $sale->animal_id = $sold->id;
+            $sale->animaltype_id = 3;
+            $sale->breed_id = $breed->id;
+            $sale->datesold = $dateSoldValue;
+            $sale->weight = $weightSoldValue;
+            $sale->price = $priceValue;
+            $sale->age = $age;
+            $sale->save();
+
+            // DB::table('sales')->insert(['animal_id' => $sold->id, 'animaltype_id' => 3, 'breed_id' => $breed->id, 'datesold' => $dateSoldValue, 'weight' => $weightSoldValue, 'price' => $priceValue, 'age' => $age]);
+
+            // return Redirect::back()->with('message','Operation Successful!');
+        }
+
+        public function addRemovedAnimalRecord(Request $request){ // function to add removed (culled/donated) animal records
+            $farm = Farm::find($request->farmable_id);
+            $breed = Breed::find($request->breedable_id);
+            $removed = Animal::where("registryid", $request->registry_id)->first();
+
+            $removedAnimal = new RemovedAnimal();
+
+            // pig removed was a grower
+            if($removed->status == "active"){
+                $removed->status = "removed grower";
+                $removed->save();
+            }
+            elseif($removed->status == "breeder"){ // pig removed was a breeder
+                $removed->status = "removed breeder";
+                $removed->save();
+            }
+
+            if(is_null($request->date_removed)){
+                $dateRemovedValue = new Carbon();
+            }
+            else{
+                $dateRemovedValue = $request->date_removed;
+            }
+
+            if(is_null($request->reason_removed)){
+                $reasonRemovedValue = "Donated";
+            }
+            else{
+                $reasonRemovedValue = $request->reason_removed;
+            }
+
+            $bday = $removed->getAnimalProperties()->where("property_id", 3)->first();
+            if(!is_null($bday)){
+                if($bday->value != "Not specified"){
+                    $age = Carbon::parse($dateRemovedValue)->diffInDays(Carbon::parse($bday->value));
+                }
+                else{
+                    $age = "Age unavailable";
+                }
+            }
+            else{
+                $age = "Age unavailable";
+            }
+
+            DB::table('removed_animals')->insert(['animal_id' => $removed->id, 'animaltype_id' => 3, 'breed_id' => $breed->id, 'dateremoved' => $dateRemovedValue, 'reason' => $reasonRemovedValue, 'age' => $age]);
+
+
+            return Redirect::back()->with('message','Operation Successful!');
+
+            $removedAnimal->animal_id = $removed->id;
+            $removedAnimal->animaltype_id = 3;
+            $removedAnimal->breed_id = $breed->id;
+            $removedAnimal->dateremoved = $dateRemovedValue;
+            $removedAnimal->reason = $reasonRemovedValue;
+            $removedAnimal->age = $age;
+            $removedAnimal->save();
+        }
+
+    public function searchPig(Request $request)
+    {
+        $searchPigs = Animal::where('registryid', 'like', '%'.$request->registry_id.'%')
+                    ->where('status',"breeder")
+                    ->orWhere('status',"active")->get();
+    
+        // $returnArray = [];
+        // foreach ($searchPigs as $search) {
+        //     array_push($returnArray, $search->registryid);
+        // }
+
+        return $searchPigs;
+    }
+
     /**
      * Display a listing of the resource.
      *
