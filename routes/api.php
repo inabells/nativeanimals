@@ -26,6 +26,7 @@ Route::get('getAllBoars', "ApiController@getAllBoars");
 Route::get('getAllFemaleGrowers', "ApiController@getAllFemaleGrowers");
 Route::get('getAllMaleGrowers', "ApiController@getAllMaleGrowers");
 Route::get('getAnimalProperties', "ApiController@getAnimalProperties");
+Route::get('getGroupingProperties', "ApiController@getGroupingProperties");
 Route::post('fetchGrossMorphology',"ApiController@fetchGrossMorphology");
 Route::post('fetchMorphometricCharacteristics',"ApiController@fetchMorphometricCharacteristics");
 Route::get('getAllCount', "ApiController@getAllCount");
@@ -38,3 +39,10 @@ Route::get('getMortalityPage', "ApiController@getMortalityPage");
 Route::get('getSalesPage', "ApiController@getSalesPage");
 Route::get('getOthersPage', "ApiController@getOthersPage");
 Route::get('searchPig',"ApiController@searchPig");
+Route::get('searchSows',"ApiController@searchSows");
+Route::get('searchBoars',"ApiController@searchBoars");
+Route::post('addBreedingRecord',"ApiController@addBreedingRecord");
+Route::get('getBreedingRecord',"ApiController@getBreedingRecord");
+Route::get('findGroupingId', "ApiController@findGroupingId");
+Route::get('getAddSowLitterRecordPage', "ApiController@getAddSowLitterRecordPage");
+
