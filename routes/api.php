@@ -45,4 +45,12 @@ Route::post('addBreedingRecord',"ApiController@addBreedingRecord");
 Route::get('getBreedingRecord',"ApiController@getBreedingRecord");
 Route::get('findGroupingId', "ApiController@findGroupingId");
 Route::get('getAddSowLitterRecordPage', "ApiController@getAddSowLitterRecordPage");
-
+Route::post('addSowLitterRecord', "ApiController@addSowLitterRecord");
+Route::post('editSowLitterRecord', "ApiController@editSowLitterRecord");
+Route::post('addIndividualSowLitterRecord', "ApiController@addIndividualSowLitterRecord");
+Route::post('addGroupSowLitterRecord', "ApiController@addGroupSowLitterRecord");
+Route::get('viewOffsprings', "ApiController@viewOffsprings");
+Route::post('editRegistryId', "ApiController@editRegistryId");
+Route::post('editSex', "ApiController@editSex");
+Route::post('updateOffspringRecord', "ApiController@updateOffspringRecord");
+Route::post('editBirthWeight', "ApiController@editBirthWeight");
