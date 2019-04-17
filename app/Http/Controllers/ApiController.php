@@ -1170,7 +1170,7 @@ class ApiController extends Controller
 
     public function addAsBreeder(Request $request)
     {
-        $searchPig = Animal::where('registryid', $request->registryid)->first();
+        $searchPig = Animal::where('registryid', $request->registry_id)->first();
         $pig = Animal::find($searchPig->id);
         $pig->status = 'breeder';
         $pig->save();
