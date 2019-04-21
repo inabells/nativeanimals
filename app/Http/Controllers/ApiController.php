@@ -2624,4 +2624,199 @@ class ApiController extends Controller
     {
         //
     }
+
+    /*
+     * functions used for adding from local to server
+     * adding is done per table
+     */
+    public function addToAnimalDb(Request $request){
+        $animal = Animal::where("registryid", $request->registryid)
+                    ->first();
+
+        //if registryid already exists in animal db, return
+        if($animal != null)
+            return "registryid already exists in animal db";
+
+        $newpig = new Animal;
+        $newpig->animaltype_id = $request->animaltype_id;
+        $newpig->registryid = $request->registryid;
+        $newpig->farm_id = $request->farm_id;
+        $newpig->breed_id = $request->breed_id;
+        $newpig->grossmorpho = $request->grossmorpho;
+        $newpig->morphochars = $request->morphochars;
+        $newpig->weightrecord = $request->weightrecord;
+        $newpig->status = $request->status;
+        $newpig->save();
+    }
+
+    public function addToAnimalPropertiesDb(Request $request){
+        $animal = Animal::where("registryid", $request->registryid)
+            ->first();
+
+        //if registryid is NOT existing in animal db, return
+        if($animal == null)
+            return "registryid is not existing in animal db";
+
+        $newprop = new AnimalProperty;
+        $newprop->animal_id = $animal->id;
+        $newprop->property_id = $request->property_id;
+        $newprop->property_id = $request->value;
+        $newprop->save();
+    }
+
+    public function addToGroupingDb(Request $request){
+        $animal_mother = Animal::where("registryid", $request->mother_registryid)
+            ->first();
+
+        $animal_father = Animal::where("registryid", $request->father_registryid)
+            ->first();
+
+        //if either mother or father is not existing in animal db
+        if($animal_mother==null || $animal_father==null)
+            return "Either mother or father not existing in animal db";
+
+        $newgrouping = new Grouping;
+        $newgrouping->registry_id = $animal_mother->registryid;
+        $newgrouping->mother_id = $animal_mother->id;
+        $newgrouping->father_id = $animal_father->id;
+        $newgrouping->breed_id = $request->breed_id;
+        $newgrouping->members = $request->members;
+        $newgrouping->save();
+    }
+
+    public function addToGroupingMembersDb(Request $request){
+        $animal_mother = Animal::where("registryid", $request->mother_registryid)
+            ->first();
+        $animal_father = Animal::where("registryid", $request->father_registryid)
+            ->first();
+
+        $grouping = Grouping::where("mother_id", $animal_mother->id)
+            ->where("father_id", $animal_father->id)
+            ->first();
+        $animal = Animal::where("registryid", $request->registryid)
+            ->first();
+
+        //if grouping or animal is not existing in db, return
+        if($grouping == null)
+            return "grouping not existing in grouping db";
+        if($animal == null)
+            return "animal not existing in animal db";
+
+        $newmember = new GroupingMember;
+        $newmember->grouping_id = $grouping->id;
+        $newmember->animal_id = $animal->id;
+        $newmember->save();
+    }
+
+    public function addToGroupingPropertiesDb(Request $request){
+        $animal_mother = Animal::where("registryid", $request->mother_registryid)
+            ->first();
+        $animal_father = Animal::where("registryid", $request->father_registryid)
+            ->first();
+
+        $grouping = Grouping::where("mother_id", $animal_mother->id)
+            ->where("father_id", $animal_father->id)
+            ->first();
+
+        //if grouping is not existing in db, return
+        if($grouping == null)
+            return "grouping not existing in grouping db";
+
+        $newprop = new GroupingProperty;
+        $newprop->grouping_id = $grouping->id;
+        $newprop->property_id = $request->property_id;
+        $newprop->value = $request->value;
+        $newprop->save();
+    }
+
+    public function addToMortalitiesDb(Request $request){
+        $animal = Animal::where("registryid", $request->registryid)
+            ->first();
+
+        //if animal is not existing, return
+        if($animal == null)
+            return "animal is not existing in animal db";
+
+        $mortality = new Mortality;
+        $mortality->animal_id = $animal->id;
+        $mortality->animaltype_id = $request->animaltype_id;
+        $mortality->breed_id = $request->breed_id;
+        $mortality->datedied = $request->datedied;
+        $mortality->cause = $request->cause;
+        $mortality->age = $request->age;
+        $mortality->save();
+    }
+
+    public function addToRemovedAnimalsDb(Request $request){
+        $animal = Animal::where("registryid", $request->registryid)
+            ->first();
+
+        //if animal is not existing, return
+        if($animal == null)
+            return "animal is not existing in animal db";
+
+        $removed = new RemovedAnimal;
+        $removed->animal_id = $animal->id;
+        $removed->animaltype_id = $request->animaltype_id;
+        $removed->breed_id = $request->breed_id;
+        $removed->dateremoved = $request->dateremoved;
+        $removed->reason = $request->reason;
+        $removed->age = $request->age;
+        $removed->save();
+    }
+
+    public function addToSalesDb(Request $request){
+        $animal = Animal::where("registryid", $request->registryid)
+            ->first();
+
+        //if animal is not existing, return
+        if($animal == null)
+            return "animal is not existing in animal db";
+
+        $sales = new Sales;
+        $sales->animal_id = $animal->id;
+        $sales->animaltype_id = $request->animaltype_id;
+        $sales->breed_id = $request->breed_id;
+        $sales->datesold = $request->datesold;
+        $sales->weight = $request->weight;
+        $sales->price = $request->price;
+        $sales->age = $request->age;
+        $sales->save();
+    }
+
+
+    /*
+     * functions used for getting from server to local
+     */
+    public function getAnimalDb(){
+        return Animal::get();
+    }
+
+    public function getAnimalPropertiesDb(){
+        return AnimalProperty::get();
+    }
+
+    public function getGroupingsDb(){
+        return Grouping::get();
+    }
+
+    public function getGroupingMembersDb(){
+        return GroupingMember::get();
+    }
+
+    public function getGroupingPropertiesDb(){
+        return GroupingProperty::get();
+    }
+
+    public function getMortalitiesDb(){
+        return Mortality::get();
+    }
+
+    public function getRemovedAnimalsDb(){
+        return RemovedAnimal::get();
+    }
+
+    public function getSalesDb(){
+        return Sale::get();
+    }
 }

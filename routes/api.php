@@ -54,3 +54,23 @@ Route::post('editRegistryId', "ApiController@editRegistryId");
 Route::post('editSex', "ApiController@editSex");
 Route::post('updateOffspringRecord', "ApiController@updateOffspringRecord");
 Route::post('editBirthWeight', "ApiController@editBirthWeight");
+
+// api functions for adding from local to server
+Route::post('addToAnimalDb', "ApiController@addToAnimalDb");
+Route::post('addToAnimalPropertiesDb', "ApiController@addToAnimalPropertiesDb");
+Route::post('addToGroupingDb', "ApiController@addToGroupingDb");
+Route::post('addToGroupingMembersDb', "ApiController@addToGroupingMembersDb");
+Route::post('addToGroupingPropertiesDb', "ApiController@addToGroupingPropertiesDb");
+Route::post('addToMortalitiesDb', "ApiController@addToMortalitiesDb");
+Route::post('addToRemovedAnimalsDb', "ApiController@addToRemovedAnimalsDb");
+Route::post('addToSalesDb', "ApiController@addToSalesDb");
+
+// api functions for getting from server to local
+Route::get('getAnimalDb', "ApiController@getAnimalDb");
+Route::get('getAnimalPropertiesDb', "ApiController@getAnimalPropertiesDb");
+Route::get('getGroupingsDb', "ApiController@getGroupingsDb");
+Route::get('getGroupingMembersDb', "ApiController@getGroupingMembersDb");
+Route::get('getGroupingPropertiesDb', "ApiController@getGroupingPropertiesDb");
+Route::get('getMortalitiesDb', "ApiController@getMortalitiesDb");
+Route::get('getRemovedAnimalsDb', "ApiController@getRemovedAnimalsDb");
+Route::get('getSalesDb', "ApiController@getSalesDb");

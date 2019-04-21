@@ -11247,7 +11247,6 @@ class FarmController extends Controller
 
 			return Redirect::back()->with('message', 'Operation Successful!');
 		}
-
 		
 		/**
 		 * Remove the specified resource from storage.
