@@ -1525,7 +1525,7 @@ class ApiController extends Controller
                     ->where("property_id", 43)
                     ->first();
             $edfValue = $edf->value;
-            
+
             $status = GroupingProperty::where("grouping_id", $group->id)
                     ->where("property_id", 60)
                     ->first();
@@ -2145,6 +2145,7 @@ class ApiController extends Controller
             $lsbaprop->save();
         }
 
+
         if(!is_null($request->offspring_earnotch) && !is_null($request->sex)){
             $offspring = new Animal;
             $farm = Farm::find($request->farmable_id);
@@ -2153,7 +2154,7 @@ class ApiController extends Controller
             $offspring->farm_id = $farm->id;
             $offspring->breed_id = $breed->id;
             $offspring->status = "temporary";
-            $offspring->registryid = $farm->code.$breed->breed."-".$birthdayValue->year.$request->sex.$request->offspring_earnotch;
+            $offspring->registryid = $farm->code.$breed->breed."-".$birthdayValue->year.$request->offspring_earnotch;
             $offspring->save();
 
             $birthday = new AnimalProperty;
@@ -2162,6 +2163,18 @@ class ApiController extends Controller
             // $birthday->value = $request->date_farrowed;
             $birthday->value = $birthdayValue;
             $birthday->save();
+
+            $earnotch = new AnimalProperty;
+            $earnotch->animal_id = $offspring->id;
+            $earnotch->property_id = 1;
+            $earnotch->value = $request->offspring_earnotch;
+            $earnotch->save();
+
+            $registryId = new AnimalProperty;
+            $registryId->animal_id = $offspring->id;
+            $registryId->property_id = 4;
+            $registryId->value = $farm->code.$breed->breed."-".$birthdayValue->year.$request->offspring_earnotch;
+            $registryId->save();
 
             $sex = new AnimalProperty;
             $sex->animal_id = $offspring->id;
@@ -2364,9 +2377,9 @@ class ApiController extends Controller
         // $animalBoar = Animal::where("registryid", $request->boar_id)->first();
             $animal = AnimalProperty::where("property_id", 1)
                                         ->where("value", $request->old_earnotch)
-                                        ->first();
+                                        ->first();      
             $offspring = Animal::find($animal->animal_id);
-            // return $offspring;
+
             $family = $offspring->getGrouping();
             $members = $family->getGroupingMembers();
 
@@ -2546,24 +2559,30 @@ class ApiController extends Controller
                 $dateweanedprop->value = $request->date_weaned;
                 $dateweanedprop->save();
 
-                $date_weaned_individual = new AnimalProperty;
-                $date_weaned_individual->animal_id = $offspring->id;
-                $date_weaned_individual->property_id = 6;
+                $date_weaned_individual = $offspring->getAnimalProperties()->where("property_id", 6)->first();
+                if($date_weaned_individual==null){
+                    $date_weaned_individual = new AnimalProperty;
+                    $date_weaned_individual->animal_id = $offspring->id;
+                    $date_weaned_individual->property_id = 6;
+                }
                 $date_weaned_individual->value = $dateweanedprop->value;
                 $date_weaned_individual->save();
 
-                $weaningweight = new AnimalProperty;
-                $weaningweight->animal_id = $offspring->id;
-                $weaningweight->property_id = 7;
+                $weaningweight = $offspring->getAnimalProperties()->where("property_id", 7)->first();
+                if($weaningweight==null){
+                    $weaningweight = new AnimalProperty;
+                    $weaningweight->animal_id = $offspring->id;
+                    $weaningweight->property_id = 7;
+                }
                 $weaningweight->value = $request->weaning_weight;
                 $weaningweight->save();
             }
 
             $bweight = $offspring->getAnimalProperties()->where("property_id", 5)->first();
             $bweightValue = $request->new_birth_weight;
-
             $bweight->value = $bweightValue;
             $bweight->save();
+            
 
             $farm = Farm::find($request->farmable_id);
             $breed = Breed::find($request->breedable_id);
