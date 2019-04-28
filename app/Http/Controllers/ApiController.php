@@ -1136,16 +1136,36 @@ class ApiController extends Controller
     public function getAllCount()
     {
         $sow = 0;
+        $gilt = 0;
         $boar = 0;
         $maleGrower = 0;
         $femaleGrower = 0;
+        $breederInventory = 0;
+        $growerInventory = 0;
+        $mortalityInventory = 0;
 
         $breeders = Animal::where('status', "breeder")->get();
         $growers = Animal::where('status', "active")->get();
 
+        $mortality = Animal::where('status', "dead breeder")
+                ->orWhere('status', "dead grower")
+                ->orWhere('status', "sold breeder")
+                ->orWhere('status', "sold grower")
+                ->orWhere('status', "removed breeder")
+                ->orWhere('status', "removed grower")
+                ->get();
+
+        $breederInventory = $breeders->count();
+        $growerInventory = $growers->count();
+        $mortalityInventory = $mortality->count();
+
         foreach ($breeders as $breeder) {
             if(substr($breeder->registryid, -7, 1) == 'F'){
-               $sow++; 
+               $checkIfExistingInGrouping = Grouping::where('registryid', $breeder->registryid)->first();
+               if(is_null($checkIfExistingInGrouping))
+                    $gilt++;
+                else
+                    $sow++;
             }else{
                 $boar++;
             }
@@ -1160,9 +1180,13 @@ class ApiController extends Controller
         }
 
         $countArray = array('sowCount' => $sow,
+                    'giltCount' => $gilt,
                     'boarCount' => $boar,
                     'femaleGrowerCount' => $femaleGrower,
-                    'maleGrowerCount' => $maleGrower
+                    'maleGrowerCount' => $maleGrower,
+                    'breederInventory' => $breederInventory,
+                    'growerInventory' => $growerInventory,
+                    'mortalityInventory' => $mortalityInventory
         );
 
         return json_encode($countArray);    
