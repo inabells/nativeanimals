@@ -1446,10 +1446,10 @@ class ApiController extends Controller
                 $age = "Age unavailable";
             }
 
-            DB::table('removed_animals')->insert(['animal_id' => $removed->id, 'animaltype_id' => 3, 'breed_id' => $breed->id, 'dateremoved' => $dateRemovedValue, 'reason' => $reasonRemovedValue, 'age' => $age]);
+            // DB::table('removed_animals')->insert(['animal_id' => $removed->id, 'animaltype_id' => 3, 'breed_id' => $breed->id, 'dateremoved' => $dateRemovedValue, 'reason' => $reasonRemovedValue, 'age' => $age]);
 
 
-            return Redirect::back()->with('message','Operation Successful!');
+            // return Redirect::back()->with('message','Operation Successful!');
 
             $removedAnimal->animal_id = $removed->id;
             $removedAnimal->animaltype_id = 3;
@@ -1520,9 +1520,22 @@ class ApiController extends Controller
                     ->where("property_id", 42)
                     ->first();
             $dateBredValue = $dateBred->value;
+
+            $edf = GroupingProperty::where("grouping_id", $group->id)
+                    ->where("property_id", 43)
+                    ->first();
+            $edfValue = $edf->value;
+            
+            $status = GroupingProperty::where("grouping_id", $group->id)
+                    ->where("property_id", 60)
+                    ->first();
+            $statusValue = $status->value;
+
             $array = array('sow_registryid' => $sow->registryid,
                     'boar_registryid' => $boar->registryid, 
-                    'dateBred' => $dateBredValue);
+                    'dateBred' => $dateBredValue,
+                    'edf' => $edfValue,
+                    'status' => $statusValue);
             array_push($returnArray, $array);
         }
 
