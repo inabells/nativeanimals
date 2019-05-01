@@ -1117,6 +1117,13 @@ class ApiController extends Controller
             $dc180d->property_id = 41;
             $dc180d->value = $dc180dValue;
 
+            $weaningWeightValue = $request->weaning_weight;
+
+            $weaningweight->animal_id = $animalid;
+            $weaningweight->property_id = 7;
+            $weaningweight->value = $weaningWeightValue;
+
+            $weaningWeightValue->save();
             $bw45d->save();
             $dc45d->save();
             $bw60d->save();
@@ -2839,6 +2846,39 @@ class ApiController extends Controller
         $sales->age = $request->age;
         $sales->save();
     }
+
+    public function editFarmProfile(Request $request){ // function to add farm profile
+        // $user = Auth::User();
+        $farm = User::find($request->farmable_id);
+        $breed = Farm::find($request->breedable_id);
+
+        // $photo = Uploads::whereNull("animal_id")->whereNull("animaltype_id")->where("breed_id", $breed->id)->first();
+
+        $breed->region = $request->region;
+        $breed->town = $request->town;
+        $breed->barangay = $request->barangay;
+        $farm->phone = $request->phone_number;
+        $farm->save();
+        $breed->save();
+    }
+
+    public function getFarmProfilePage(Request $request){ // function to display Farm Profile page
+        $farm = User::find($request->farmable_id);
+        $breed = Farm::find($request->breedable_id);
+        $user = Breed::where('id', $request->breedable_id)->first();
+
+        return json_encode(compact('farm', 'breed', 'user'));
+    }
+
+    // public function getBreed(){
+
+    // }
+
+    //  $animal = Animal::where("registryid", $request->registry_id)->first();
+    //     $properties = $animal->getAnimalProperties();
+
+    //     return json_encode(compact('animal', 'properties'));
+
 
 
     /*

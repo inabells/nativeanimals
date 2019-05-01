@@ -74,3 +74,5 @@ Route::get('getGroupingPropertiesDb', "ApiController@getGroupingPropertiesDb");
 Route::get('getMortalitiesDb', "ApiController@getMortalitiesDb");
 Route::get('getRemovedAnimalsDb', "ApiController@getRemovedAnimalsDb");
 Route::get('getSalesDb', "ApiController@getSalesDb");
+Route::post('editFarmProfile', "ApiController@editFarmProfile");
+Route::post('getFarmProfilePage', "ApiController@getFarmProfilePage");
