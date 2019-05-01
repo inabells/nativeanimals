@@ -1140,8 +1140,10 @@ class ApiController extends Controller
             $animal->save();
         }
 
-    public function getAllCount()
+    public function getAllCount(Request $request)
     {
+        $farm = Farm::find($request->farmable_id);
+        $breed = Breed::find($request->breedable_id);
         $sow = 0;
         $gilt = 0;
         $boar = 0;
@@ -2868,6 +2870,12 @@ class ApiController extends Controller
         $user = Breed::where('id', $request->breedable_id)->first();
 
         return json_encode(compact('farm', 'breed', 'user'));
+    }
+
+    public function getEmail(Request $request){
+        $user = User::where('email', $request->email)->first();
+
+         return json_encode(compact('user'));
     }
 
     // public function getBreed(){
