@@ -8,7 +8,7 @@ class AnimalProperty extends Model
 {
   protected $table = 'animal_properties';
   protected $fillable = [
-    'value',
+    'value'
   ];
 
   public function properties()

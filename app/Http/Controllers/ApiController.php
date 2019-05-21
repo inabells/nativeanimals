@@ -1550,23 +1550,37 @@ class ApiController extends Controller
 
         $returnArray = [];
         foreach($groups as $group){
+            $dateBredValue = "";
+            $edfValue = "";
+            $statusValue = "";
+
             $array = [];
-            $sow = Animal::where("id", $group->mother_id)->where("breed_id", $breed->id)->first();
-            $boar = Animal::where("id", $group->father_id)->where("breed_id", $breed->id)->first();
+            $sow = Animal::where("id", $group->mother_id)
+                ->where("breed_id", $breed->id)
+                ->first();
+            $boar = Animal::where("id", $group->father_id)
+                ->where("breed_id", $breed->id)
+                ->first();
             $dateBred = GroupingProperty::where("grouping_id", $group->id)
                     ->where("property_id", 42)
                     ->first();
-            $dateBredValue = $dateBred->value;
+            if($dateBred!=null){
+                $dateBredValue = $dateBred->value;
+            }
 
             $edf = GroupingProperty::where("grouping_id", $group->id)
                     ->where("property_id", 43)
                     ->first();
-            $edfValue = $edf->value;
+            if($edf!=null){
+                $edfValue = $edf->value;
+            }
 
             $status = GroupingProperty::where("grouping_id", $group->id)
                     ->where("property_id", 60)
                     ->first();
-            $statusValue = $status->value;
+            if($status!=null){
+                $statusValue = $status->value;
+            }
 
             $array = array('sow_registryid' => $sow->registryid,
                     'boar_registryid' => $boar->registryid, 
@@ -2724,7 +2738,8 @@ class ApiController extends Controller
      */
     public function addToAnimalDb(Request $request){
         $animal = Animal::where("registryid", $request->registryid)
-                    ->first();
+            ->where("farm_id", $request->farm_id)  
+            ->first();
 
         //if registryid already exists in animal db, return
         if($animal != null)
@@ -2746,30 +2761,32 @@ class ApiController extends Controller
         $animal = Animal::where("registryid", $request->registryid)
             ->first();
 
-        //if registryid is NOT existing in animal db, return
+        //if registryid is not existing in animal db, return
         if($animal == null)
             return "registryid is not existing in animal db";
 
         $newprop = new AnimalProperty;
         $newprop->animal_id = $animal->id;
         $newprop->property_id = $request->property_id;
-        $newprop->property_id = $request->value;
+        $newprop->value = $request->value;
         $newprop->save();
     }
 
     public function addToGroupingDb(Request $request){
         $animal_mother = Animal::where("registryid", $request->mother_registryid)
+            ->where("breed_id", $request->breed_id)
             ->first();
 
         $animal_father = Animal::where("registryid", $request->father_registryid)
+            ->where("breed_id", $request->breed_id)
             ->first();
 
-        //if either mother or father is not existing in animal db
+        //if either mother or father is not existing in animal db, return
         if($animal_mother==null || $animal_father==null)
             return "Either mother or father not existing in animal db";
 
         $newgrouping = new Grouping;
-        $newgrouping->registry_id = $animal_mother->registryid;
+        $newgrouping->registryid = $animal_mother->registryid;
         $newgrouping->mother_id = $animal_mother->id;
         $newgrouping->father_id = $animal_father->id;
         $newgrouping->breed_id = $request->breed_id;
@@ -2779,8 +2796,10 @@ class ApiController extends Controller
 
     public function addToGroupingMembersDb(Request $request){
         $animal_mother = Animal::where("registryid", $request->mother_registryid)
+            ->where("breed_id", $request->breed_id)
             ->first();
         $animal_father = Animal::where("registryid", $request->father_registryid)
+            ->where("breed_id", $request->breed_id)
             ->first();
 
         $grouping = Grouping::where("mother_id", $animal_mother->id)
@@ -2803,8 +2822,10 @@ class ApiController extends Controller
 
     public function addToGroupingPropertiesDb(Request $request){
         $animal_mother = Animal::where("registryid", $request->mother_registryid)
+            ->where("breed_id", $request->breed_id)
             ->first();
         $animal_father = Animal::where("registryid", $request->father_registryid)
+            ->where("breed_id", $request->breed_id)
             ->first();
 
         $grouping = Grouping::where("mother_id", $animal_mother->id)
@@ -2860,13 +2881,14 @@ class ApiController extends Controller
 
     public function addToSalesDb(Request $request){
         $animal = Animal::where("registryid", $request->registryid)
+            ->where("breed_id", $request->breed_id)
             ->first();
 
         //if animal is not existing, return
         if($animal == null)
             return "animal is not existing in animal db";
 
-        $sales = new Sales;
+        $sales = new Sale;
         $sales->animal_id = $animal->id;
         $sales->animaltype_id = $request->animaltype_id;
         $sales->breed_id = $request->breed_id;
