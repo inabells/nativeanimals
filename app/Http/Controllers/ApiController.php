@@ -1140,6 +1140,17 @@ class ApiController extends Controller
             $animal->save();
         }
 
+    public static function whereInMultiple(array $columns, $values)
+    {
+        $values = array_map(function (array $value) {
+            return "('".implode($value, "', '")."')"; 
+        }, $values);
+
+        return static::query()->whereRaw(
+            '('.implode($columns, ', ').') in ('.implode($values, ', ').')'
+        );
+    }
+
     public function getAllCount(Request $request)
     {
         $farm = Farm::find($request->farmable_id);
@@ -1153,9 +1164,12 @@ class ApiController extends Controller
         $growerInventory = 0;
         $mortalityInventory = 0;
 
-        $breeders = Animal::where('status', "breeder")->get();
-        $growers = Animal::where('status', "active")->get();
-
+        $breeders = Animal::where('status', "breeder")
+            ->where('farm_id', $farm->id)
+            ->get();
+        $growers = Animal::where('status', "active")
+            ->where('farm_id', $farm->id)
+            ->get();  
         $mortality = Animal::where('status', "dead breeder")
                 ->orWhere('status', "dead grower")
                 ->orWhere('status', "sold breeder")
@@ -1164,13 +1178,17 @@ class ApiController extends Controller
                 ->orWhere('status', "removed grower")
                 ->get();
 
+        $mortality = $mortality->where('farm_id', $farm->id);
+
         $breederInventory = $breeders->count();
         $growerInventory = $growers->count();
         $mortalityInventory = $mortality->count();
 
         foreach ($breeders as $breeder) {
             if(substr($breeder->registryid, -7, 1) == 'F'){
-               $checkIfExistingInGrouping = Grouping::where('registryid', $breeder->registryid)->first();
+               $checkIfExistingInGrouping = Grouping::where('registryid', $breeder->registryid)
+                    ->where('breed_id', $breed->id)
+                    ->first();
                if(is_null($checkIfExistingInGrouping))
                     $gilt++;
                 else
@@ -1471,9 +1489,13 @@ class ApiController extends Controller
 
     public function searchPig(Request $request)
     {
+        $farm = Farm::find($request->farmable_id);
+        $breed = Breed::find($request->breedable_id);
         $searchPigs = Animal::where('registryid', 'like', '%'.$request->registry_id.'%')
                     ->where('status',"breeder")
-                    ->orWhere('status',"active")->get();
+                    ->orWhere('status',"active")
+                    ->where("breed_id", $breed->id)
+                    ->get();
     
         // $returnArray = [];
         // foreach ($searchPigs as $search) {
@@ -1486,8 +1508,11 @@ class ApiController extends Controller
 
     public function searchSows(Request $request)
     {
+        $farm = Farm::find($request->farmable_id);
+        $breed = Breed::find($request->breedable_id);
         $searchSows = Animal::where('registryid', 'like', '%'.$request->registry_id.'%')
                     ->where('status',"breeder")
+                    ->where("breed_id", $breed->id)
                     ->get();
 
         $sow = [];
@@ -1501,9 +1526,12 @@ class ApiController extends Controller
 
     public function searchBoars(Request $request)
     {
+        $farm = Farm::find($request->farmable_id);
+        $breed = Breed::find($request->breedable_id);
         $searchBoars = Animal::where('registryid', 'like', '%'.$request->registry_id.'%')
                     ->where('status',"breeder")
-                    ->get();
+                    ->where("breed_id", $breed->id)
+                    ->get();  
 
         $boar = [];
         foreach ($searchBoars as $searchBoar) {
@@ -1518,13 +1546,13 @@ class ApiController extends Controller
     {
         $farm = Farm::find($request->farmable_id);
         $breed = Breed::find($request->breedable_id);
-        $groups = Grouping::get();
+        $groups = Grouping::where("breed_id", $breed->id)->get();
 
         $returnArray = [];
         foreach($groups as $group){
             $array = [];
-            $sow = Animal::find($group->mother_id);
-            $boar = Animal::find($group->father_id);
+            $sow = Animal::where("id", $group->mother_id)->where("breed_id", $breed->id)->first();
+            $boar = Animal::where("id", $group->father_id)->where("breed_id", $breed->id)->first();
             $dateBred = GroupingProperty::where("grouping_id", $group->id)
                     ->where("property_id", 42)
                     ->first();
@@ -1554,8 +1582,8 @@ class ApiController extends Controller
     public function addBreedingRecord(Request $request){ // function to add new breeding record
         $farm = Farm::find($request->farmable_id);
         $breed = Breed::find($request->breedable_id);
-        $sowRegId = Animal::where("registryid", $request->sow_id)->first();
-        $boarRegId = Animal::where("registryid", $request->boar_id)->first();
+        $sowRegId = Animal::where("registryid", $request->sow_id)->where("breed_id", $breed->id)->first();
+        $boarRegId = Animal::where("registryid", $request->boar_id)->where("breed_id", $breed->id)->first();
 
         $pair = new Grouping;
         $pair->registryid = $sowRegId->registryid;

@@ -29,7 +29,7 @@ Route::get('getAnimalProperties', "ApiController@getAnimalProperties");
 Route::get('getGroupingProperties', "ApiController@getGroupingProperties");
 Route::post('fetchGrossMorphology',"ApiController@fetchGrossMorphology");
 Route::post('fetchMorphometricCharacteristics',"ApiController@fetchMorphometricCharacteristics");
-Route::post('getAllCount', "ApiController@getAllCount");
+Route::get('getAllCount', "ApiController@getAllCount");
 Route::post('fetchWeightRecords',"ApiController@fetchWeightRecords");
 Route::post('addAsBreeder',"ApiController@addAsBreeder");
 Route::post('addMortalityRecord', "ApiController@addMortalityRecord");
