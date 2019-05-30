@@ -17,8 +17,7 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::get('testDbConnection', "ApiController@testDbConnection");
-Route::get('getAllPigs', "ApiController@getAllPigs");
+Route::get('getAllFarms', "ApiController@getAllFarms");
 Route::post('fetchNewPigRecord', "ApiController@fetchNewPigRecord");
 Route::get('getViewSowPage', "ApiController@getViewSowPage");
 Route::get('getAllSows', "ApiController@getAllSows");

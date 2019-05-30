@@ -39,7 +39,7 @@ class ApiController extends Controller
         });
     }
 
-    public function getAllPigs(){
+    public function getAllFarms(){
         return Farm::get();  
     }
 
@@ -1189,10 +1189,11 @@ class ApiController extends Controller
                $checkIfExistingInGrouping = Grouping::where('registryid', $breeder->registryid)
                     ->where('breed_id', $breed->id)
                     ->first();
-               if(is_null($checkIfExistingInGrouping))
+               if($checkIfExistingInGrouping == null){
                     $gilt++;
-                else
+                }else {
                     $sow++;
+                }
             }else{
                 $boar++;
             }
@@ -2942,35 +2943,53 @@ class ApiController extends Controller
     /*
      * functions used for getting from server to local
      */
-    public function getAnimalDb(){
-        return Animal::get();
+    public function getAnimalDb(Request $request){
+        return Animal::where("breed_id", $request->breedable_id)->get();
     }
 
-    public function getAnimalPropertiesDb(){
-        return AnimalProperty::get();
+    public function getAnimalPropertiesDb(Request $request){
+        $animals = Animal::select("id")
+            ->distinct()
+            ->where("breed_id", $request->breedable_id)
+            ->get()
+            ->toArray();
+
+        return AnimalProperty::whereIn("animal_id", $animals)->get();
     }
 
-    public function getGroupingsDb(){
-        return Grouping::get();
+    public function getGroupingsDb(Request $request){
+        return Grouping::where("breed_id", $request->breedable_id)->get();
     }
 
-    public function getGroupingMembersDb(){
-        return GroupingMember::get();
+    public function getGroupingMembersDb(Request $request){
+        $groupings = Grouping::select("id")
+            ->distinct()
+            ->where("breed_id", $request->breedable_id)
+            ->get()
+            ->toArray();
+
+        return GroupingMember::whereIn("grouping_id", $groupings)->get();
     }
 
-    public function getGroupingPropertiesDb(){
-        return GroupingProperty::get();
+    public function getGroupingPropertiesDb(Request $request){
+        $groupings = Grouping::select("id")
+            ->distinct()
+            ->where("breed_id", $request->breedable_id)
+            ->get()
+            ->toArray();
+
+        return GroupingProperty::whereIn("grouping_id", $groupings)->get();
     }
 
-    public function getMortalitiesDb(){
-        return Mortality::get();
+    public function getMortalitiesDb(Request $request){
+        return Mortality::where("breed_id", $request->breedable_id)->get();
     }
 
-    public function getRemovedAnimalsDb(){
-        return RemovedAnimal::get();
+    public function getRemovedAnimalsDb(Request $request){
+        return RemovedAnimal::where("breed_id", $request->breedable_id)->get();
     }
 
-    public function getSalesDb(){
-        return Sale::get();
+    public function getSalesDb(Request $request){
+        return Sale::where("breed_id", $request->breedable_id)->get();
     }
 }
