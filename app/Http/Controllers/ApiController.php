@@ -461,7 +461,15 @@ class ApiController extends Controller
             }
             else{
                 $end_date = Carbon::parse($properties->where("property_id", 3)->first()->value);
-                $age = $now->diffInMonths($end_date);
+                $age = $now->diffInDays($end_date);
+
+                //compute months and days
+                $sub_struct_month = ($age / 30) ;
+                $sub_struct_month = floor($sub_struct_month); 
+                $sub_struct_days = ($age % 30); // the rest of days
+                $sub_struct = $sub_struct_month." month(s), ".$sub_struct_days." day(s)";
+
+                $age = $sub_struct;
             }
         }
         else{
@@ -476,7 +484,15 @@ class ApiController extends Controller
             else{
                 $start_weaned = Carbon::parse($properties->where("property_id", 3)->first()->value);
                 $end_weaned = Carbon::parse($properties->where("property_id", 6)->first()->value);
-                $ageAtWeaning = $end_weaned->diffInMonths($start_weaned);
+                $ageAtWeaning = $end_weaned->diffInDays($start_weaned);
+
+                //compute months and days
+                $sub_struct_month = ($ageAtWeaning / 30) ;
+                $sub_struct_month = floor($sub_struct_month); 
+                $sub_struct_days = ($ageAtWeaning % 30); // the rest of days
+                $sub_struct = $sub_struct_month." month(s), ".$sub_struct_days." day(s)";
+
+                $ageAtWeaning = $sub_struct;
             }
         }
         else{
@@ -498,7 +514,15 @@ class ApiController extends Controller
                                 if(!is_null($date_bred) && $date_bred->value != "Not specified"){
                                     if(!is_null($sow->getAnimalProperties()->where("property_id", 3)->first()) && $sow->getAnimalProperties()->where("property_id", 3)->first()->value != "Not specified"){
                                         $bday = $sow->getAnimalProperties()->where("property_id", 3)->first()->value;
-                                        $ageAtFirstMating = Carbon::parse($date_bred->value)->diffInMonths(Carbon::parse($bday));
+                                        $ageAtFirstMating = Carbon::parse($date_bred->value)->diffInDays(Carbon::parse($bday));
+
+                                        //compute months and days
+                                        $sub_struct_month = ($ageAtFirstMating / 30) ;
+                                        $sub_struct_month = floor($sub_struct_month); 
+                                        $sub_struct_days = ($ageAtFirstMating % 30); // the rest of days
+                                        $sub_struct = $sub_struct_month." month(s), ".$sub_struct_days." day(s)";
+
+                                        $ageAtFirstMating = $sub_struct;
                                     }
                                     else{
                                         $ageAtFirstMating = "";
@@ -1543,6 +1567,19 @@ class ApiController extends Controller
         return json_encode($boar);
     }
 
+    // public function searchPig(Request $request)
+    // {
+    //     $farm = Farm::find($request->farmable_id);
+    //     $breed = Breed::find($request->breedable_id);
+    //     $searchPig = Animal::where('registryid', 'like', '%'.$request->registry_id.'%')
+    //                 ->where('status',"breeder")
+    //                 ->orWhere('status',"active")
+    //                 ->where("breed_id", $breed->id)
+    //                 ->get();  
+
+    //     return json_encode($searchPig);
+    // }
+
     public function getBreedingRecord(Request $request)
     {
         $farm = Farm::find($request->farmable_id);
@@ -1562,36 +1599,39 @@ class ApiController extends Controller
             $boar = Animal::where("id", $group->father_id)
                 ->where("breed_id", $breed->id)
                 ->first();
-            $dateBred = GroupingProperty::where("grouping_id", $group->id)
-                    ->where("property_id", 42)
-                    ->first();
-            if($dateBred!=null){
-                $dateBredValue = $dateBred->value;
-            }
 
-            $edf = GroupingProperty::where("grouping_id", $group->id)
-                    ->where("property_id", 43)
-                    ->first();
-            if($edf!=null){
-                $edfValue = $edf->value;
-            }
+            if($sow!=null && $boar!=null){
+                $dateBred = GroupingProperty::where("grouping_id", $group->id)
+                        ->where("property_id", 42)
+                        ->first();
+                if($dateBred!=null){
+                    $dateBredValue = $dateBred->value;
+                }
 
-            $status = GroupingProperty::where("grouping_id", $group->id)
-                    ->where("property_id", 60)
-                    ->first();
-            if($status!=null){
-                $statusValue = $status->value;
-            }
+                $edf = GroupingProperty::where("grouping_id", $group->id)
+                        ->where("property_id", 43)
+                        ->first();
+                if($edf!=null){
+                    $edfValue = $edf->value;
+                }
 
-            $array = array('sow_registryid' => $sow->registryid,
-                    'boar_registryid' => $boar->registryid, 
-                    'dateBred' => $dateBredValue,
-                    'edf' => $edfValue,
-                    'status' => $statusValue);
-            array_push($returnArray, $array);
+                $status = GroupingProperty::where("grouping_id", $group->id)
+                        ->where("property_id", 60)
+                        ->first();
+                if($status!=null){
+                    $statusValue = $status->value;
+                }
+
+                $array = array('sow_registryid' => $sow->registryid,
+                        'boar_registryid' => $boar->registryid, 
+                        'dateBred' => $dateBredValue,
+                        'edf' => $edfValue,
+                        'status' => $statusValue);
+                array_push($returnArray, $array);
+            }
         }
 
-        return $returnArray;
+        return json_encode($returnArray);
     }
 
     public function addBreedingRecord(Request $request){ // function to add new breeding record
@@ -2797,10 +2837,8 @@ class ApiController extends Controller
 
     public function addToGroupingMembersDb(Request $request){
         $animal_mother = Animal::where("registryid", $request->mother_registryid)
-            ->where("breed_id", $request->breed_id)
             ->first();
         $animal_father = Animal::where("registryid", $request->father_registryid)
-            ->where("breed_id", $request->breed_id)
             ->first();
 
         $grouping = Grouping::where("mother_id", $animal_mother->id)
@@ -2823,10 +2861,8 @@ class ApiController extends Controller
 
     public function addToGroupingPropertiesDb(Request $request){
         $animal_mother = Animal::where("registryid", $request->mother_registryid)
-            ->where("breed_id", $request->breed_id)
             ->first();
         $animal_father = Animal::where("registryid", $request->father_registryid)
-            ->where("breed_id", $request->breed_id)
             ->first();
 
         $grouping = Grouping::where("mother_id", $animal_mother->id)
@@ -2937,8 +2973,6 @@ class ApiController extends Controller
     //     $properties = $animal->getAnimalProperties();
 
     //     return json_encode(compact('animal', 'properties'));
-
-
 
     /*
      * functions used for getting from server to local
